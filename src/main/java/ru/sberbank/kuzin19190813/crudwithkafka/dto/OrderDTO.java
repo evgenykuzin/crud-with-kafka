@@ -1,0 +1,22 @@
+package ru.sberbank.kuzin19190813.crudwithkafka.dto;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+import ru.sberbank.kuzin19190813.crudwithkafka.entities.*;
+import ru.sberbank.kuzin19190813.crudwithkafka.util.converter.entity_and_dto.EntityMapper;
+
+import java.util.List;
+
+@EqualsAndHashCode(callSuper = true)
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@EntityMapper(className = Order.class)
+public class OrderDTO extends AbstractDTO {
+    String status;
+    Long clientId;
+    Long shopId;
+    List<Long> productIds;
+    Long deliveryId;
+}

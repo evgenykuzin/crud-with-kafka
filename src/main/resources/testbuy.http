@@ -1,0 +1,46 @@
+GET http://localhost:8080/actuator
+Accept: application/json
+
+###
+POST http://localhost:8080/shops/create/?name=Magaz
+Accept: application/json
+
+###
+GET http://localhost:8080/cities/
+Accept: application/json
+
+###
+POST http://localhost:8080/orders/save
+Content-Type: application/json
+Token: client-token
+
+{
+
+}
+
+###
+DELETE http://localhost:8080/cities/delete/1
+Accept: application/json
+
+###
+POST http://localhost:8080/cities/save
+Content-Type: application/json
+
+{
+  "name": "London"
+}
+
+###
+GET http://localhost:8080/cities/get/1
+Accept: application/json
+
+###
+POST http://localhost:8080/api/client/orders/add-product
+Content-Type: application/json
+
+{
+  "clientId": "12",
+  "barcode": "bar123"
+}
+
+###
