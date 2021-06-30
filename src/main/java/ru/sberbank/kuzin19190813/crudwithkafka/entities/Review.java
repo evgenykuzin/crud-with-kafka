@@ -3,6 +3,7 @@ package ru.sberbank.kuzin19190813.crudwithkafka.entities;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 import ru.sberbank.kuzin19190813.crudwithkafka.dto.ReviewDTO;
 import ru.sberbank.kuzin19190813.crudwithkafka.util.converter.entity_and_dto.DtoMapper;
@@ -15,10 +16,6 @@ import javax.persistence.*;
 @Entity
 @DtoMapper(className = ReviewDTO.class)
 public class Review extends AbstractEntity {
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    Long id;
-
     String comment;
     Integer estimate;
     Product product;

@@ -1,22 +1,23 @@
 package ru.sberbank.kuzin19190813.crudwithkafka.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.JpaRepository;
 import ru.sberbank.kuzin19190813.crudwithkafka.dto.AbstractDTO;
 import ru.sberbank.kuzin19190813.crudwithkafka.entities.AbstractEntity;
+import ru.sberbank.kuzin19190813.crudwithkafka.repositories.AbstractBaseRepository;
 import ru.sberbank.kuzin19190813.crudwithkafka.services.util.Search;
 import ru.sberbank.kuzin19190813.crudwithkafka.util.converter.entity_and_dto.SuperMapper;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public abstract class DTOService <D extends AbstractDTO, E extends AbstractEntity, R extends JpaRepository<E, Long>> extends JpaService<E, R> {
+public abstract class DTOService<D extends AbstractDTO, E extends AbstractEntity, R extends AbstractBaseRepository<E>> extends JpaService<E, R> {
     @Autowired
-    private SuperMapper superMapper;
+    protected SuperMapper superMapper;
 
-    public DTOService(R jpaRepository) {
-        super(jpaRepository);
+    public DTOService(R repository) {
+        super(repository);
     }
 
     public Long saveDto(D dto) {
@@ -50,11 +51,16 @@ public abstract class DTOService <D extends AbstractDTO, E extends AbstractEntit
     public List<D> findDtoBy(Search... searches) {
         return findBy(searches)
                 .stream()
-                .map((Function<E, D>)e -> superMapper.toDto(e))
+                .map((Function<E, D>) e -> superMapper.toDto(e))
                 .collect(Collectors.toList());
     }
 
     public List<D> findDtoBy(String key, Object value) {
         return findDtoBy(new Search(key, value));
+    }
+
+    @Transactional
+    public void clearAll() {
+        repository.truncateTable();
     }
 }

@@ -19,5 +19,4 @@ public class ProductDTO extends AbstractDTO {
     String barcode;
     String article;
     Long shopId;
-    List<Long> orderIds;
 }

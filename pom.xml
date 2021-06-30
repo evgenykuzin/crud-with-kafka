@@ -20,20 +20,22 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <jackson.version>2.6.0</jackson.version>
+        <mainClass>ru.sberbank.kuzin19190813.crudwithkafka.App</mainClass>
+        <base.image>registry.sigma.sbrf.ru/pprb-dev/ci02705305/ci02729426_pprb_payments_dev/${artifactId}</base.image>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>maven-central</id>
-            <url>${user.home}/.m2/repository/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
+<!--    <repositories>-->
+<!--        <repository>-->
+<!--            <id>maven-central</id>-->
+<!--            <url>${user.home}/.m2/repository/</url>-->
+<!--            <releases>-->
+<!--                <enabled>true</enabled>-->
+<!--            </releases>-->
+<!--            <snapshots>-->
+<!--                <enabled>true</enabled>-->
+<!--            </snapshots>-->
+<!--        </repository>-->
+<!--    </repositories>-->
 
     <dependencies>
         <!--SPRING-->
@@ -76,7 +78,7 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>1.4.190</version>
+            <version>1.4.197</version>
         </dependency>
 
         <!--UTIL-->
@@ -96,6 +98,8 @@
             <artifactId>guava</artifactId>
             <version>23.1-jre</version>
         </dependency>
+
+        <!--MAPPER-->
         <dependency>
             <groupId>org.modelmapper</groupId>
             <artifactId>modelmapper</artifactId>
@@ -109,6 +113,28 @@
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+
+        <!--SWAGGER-->
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-boot-starter</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-bean-validators</artifactId>
+            <version>3.0.0</version>
         </dependency>
 
         <!--TEST-->
@@ -154,6 +180,58 @@
                     <target>${java.version}</target>
                 </configuration>
             </plugin>
+            <!-- JIB config-->
+<!--            <plugin>-->
+<!--                <groupId>com.google.cloud.tools</groupId>-->
+<!--                <artifactId>jib-maven-plugin</artifactId>-->
+<!--                <version>2.8.0</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>create-release-image</id>-->
+<!--                        <phase>install</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>build</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <from>-->
+<!--                                &lt;!&ndash; ссылка на образ с которого формируем собственный &ndash;&gt;-->
+<!--                                <image>${base.image}</image>-->
+<!--                                <auth>-->
+<!--                                    &lt;!&ndash; логин и пароль не меняются &ndash;&gt;-->
+<!--                                    <username>${nexus.user}</username>-->
+<!--                                    <password>${nexus.password}</password>-->
+<!--                                </auth>-->
+<!--                            </from>-->
+<!--                            &lt;!&ndash; Формирование контейнера, где можно выбрать способ с mainСlass-->
+<!--                            - основной класс приложения или папки/файла appRoot &ndash;&gt;-->
+<!--                            <container>-->
+<!--                                <format>Docker</format>-->
+<!--                                &lt;!&ndash; <ports>8080</ports> &ndash;&gt;-->
+<!--                                <mainClass>${mainClass}</mainClass>-->
+<!--                                &lt;!&ndash;                                 <appRoot>/target/${project.artifactId}-${project.version}.jar</appRoot>&ndash;&gt;-->
+<!--                                <ports>8080</ports>-->
+<!--                                <jvmFlags>-->
+<!--                                    -Dspring.config.location=file:/deployments/config/application.yml,file:/deployments/config/ssl/ssl.yml,file:/deployments/config/secret/esb-config.yml,file:/deployments/config/secret/ups-config.yml-->
+<!--                                </jvmFlags>-->
+<!--                            </container>-->
+<!--                            <to>-->
+<!--                                &lt;!&ndash; репозиторий куда деплоить контейнер и именем проекта &ndash;&gt;-->
+<!--                                <image>${deploy.path}${project.artifactId}</image>-->
+<!--                                <auth>-->
+<!--                                    <username>${nexus.user}</username>-->
+<!--                                    <password>${nexus.password}</password>-->
+<!--                                </auth>-->
+<!--                                &lt;!&ndash; не изменяется, проставляет версию и тэг для образа &ndash;&gt;-->
+<!--                                <tags>-->
+<!--                                    <tag>v1</tag>-->
+<!--                                    <tag>${project.version}</tag>-->
+<!--                                </tags>-->
+<!--                            </to>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+
         </plugins>
     </build>
 

@@ -1,0 +1,319 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: crud-with-kafka-template
+  labels: { app: crud-with-kafka}
+objects:
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: crud-with-kafka-config-${VERSION}
+      labels: { app: crud-with-kafka }
+    data:
+      application.yml: |-
+        kafka:
+          server: 10.53.222.63:9092
+        spring:
+          datasource:
+            driver-class-name: org.h2.Driver
+            password: 456
+            url: jdbc:h2:mem:marketplace_db;MV_STORE=false;MODE=MySQL
+            username: 123
+          jpa:
+            database-platform: org.hibernate.dialect.H2Dialect
+            generate-ddl: true
+            hibernate:
+              ddl-auto: create-drop
+            show_sql: true
+          kafka:
+            consumer:
+              group-id: kafka-id-2
+            template:
+              default-topic: topic1
+        logging:
+          file:
+            name: crud-with-kafka.log
+        server:
+          port: 8080
+        management:
+          server:
+            port: 8090
+          # Включить все конечные точки
+          endpoints:
+            web:
+              exposure:
+                include: "*"
+          endpoint:
+            shutdown:
+              enabled: true
+            health:
+              show-details: always
+          # Включить экспорт prometheus
+          metrics:
+            export:
+              prometheus:
+                enabled: true
+            # включить гистограмму на основе процентилей для http запросов
+            distribution:
+              percentiles-histogram:
+                "[http.server.requests]": true
+            # сегментов гистограммы http SLA
+              sla:
+                http:
+                  server:
+                    requests: 1ms,5ms
+            # включить метрики JVM
+            enable:
+              jvm: true
+
+        info:
+          application:
+            name: crud-with-kafka
+            description: ...
+            artifact: crud-with-kafka
+            version: 1.0-SNAPSHOT
+          techstack:
+            java: open jdk 8
+            spring boot: 2.5.0
+            database: H2
+            kafka:
+    triggers:
+      - type: ConfigChange
+  - apiVersion: autoscaling/v1
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: crud-with-kafka-pod-autoscaler-${VERSION}
+    spec:
+      maxReplicas: '${{MAX_REPLICAS}}'
+      minReplicas: '${{MIN_REPLICAS}}'
+      scaleTargetRef:
+        apiVersion: apps/v1
+        kind: Deployment
+        name: crud-with-kafka-${VERSION}
+      targetCPUUtilizationPercentage: '${{CPU_UTILIZATION_FOR_AUTOSCALE}}'
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: crud-with-kafka-service
+      annotations:
+        # Аннотация для включения сбора метрик
+        prometheus.io.scrape: "true"
+        # Аннотация для указания HTTP endpoint с метриками приложения
+        prometheus.io.path: "/actuator/prometheus"
+        # Аннотация для указания порта подключения к HTTP endpoint с метриками
+        prometheus.io.port: "8090"
+      labels:
+        app: ingress-gateway
+        template: ingress-gateway
+    spec:
+      type: ClusterIP
+      ports:
+        - name: http
+          protocol: TCP
+          port: 8080
+          targetPort: 8080
+        - name: http-actuator
+          protocol: TCP
+          port: 8090
+          targetPort: 8090
+      selector:
+        app: crud-with-kafka
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: crud-with-kafka-${VERSION}
+      labels:
+        app: crud-with-kafka-${VERSION}
+        name: crud-with-kafka-${VERSION}
+        template: ingress-gateway
+    spec:
+      replicas: '${{REPLICAS}}'
+      selector:
+        matchLabels: { app: crud-with-kafka, name: crud-with-kafka, version: 'v${VERSION}' }
+      template:
+        metadata:
+          labels:  { app: crud-with-kafka, name: crud-with-kafka, version: 'v${VERSION}' }
+        spec:
+          containers:
+            - name: crud-with-kafka
+              image: '${IMAGE_PATH}'
+              imagePullPolicy: Always
+              ports:
+                - name: http
+                  containerPort: 8080
+                - name: actuator
+                  containerPort: 8090
+              livenessProbe:
+                httpGet: { path: /actuator/health, port: 8090, schema: HTTP }
+                initialDelaySeconds: '${{INITIAL_DELAY_SECONDS}}'
+                timeoutSeconds: 5
+                periodSeconds: 10
+                successThreshold: 1
+                failureThreshold: 5
+              readinessProbe:
+                httpGet: {path: /actuator/health, port: 8090, schema: HTTP}
+                initialDelaySeconds: '${{INITIAL_DELAY_SECONDS}}'
+                timeoutSeconds: 5
+                periodSeconds: 10
+                successThreshold: 1
+                failureThreshold: 2
+              resources:
+                limits: { cpu: '${APP_LIMIT_CPU}', memory: '${APP_LIMIT_RAM}'}
+                requests: { cpu: '${APP_REQUEST_CPU}', memory: '${APP_REQUEST_RAM}'}
+              env:
+                - name: PROJECT_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+                - name: NODE_NAME       #добавление имени ноды в переменные среды пода
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: spec.nodeName
+                - name: POD_NAMESPACE    #добавление имени неймспейса в переменные среды пода
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+                - name: POD_NAME        #добавление имени пода в переменные среды пода
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.name
+              volumeMounts:
+                - { name: application-config, mountPath: /deployments/config, readOnly: true }
+                - { name: application-config-ssl, mountPath: /deployments/config/ssl/, readOnly: true}
+                - { name: '${DB_ACCESS_SECRET_NAME}', mountPath: /deployments/secret, readOnly: true }
+                - { name: synapselogs, mountPath: /opt/synapse/logs }
+                - { name: logbacklogs, mountPath: /app/logs/ }
+parameters:
+  - name: REPLICAS
+    description: кол-во реплицируемых экземпляров
+    value: "1"
+    required: true
+    from: "[0-9]"
+  - name: APP_LIMIT_CPU
+    description: ограничение CPU
+    value: "750m"
+    required: true
+  - name: APP_LIMIT_RAM
+    description: ограничение памяти
+    value: "1700Mi"
+    required: true
+  - name: APP_REQUEST_CPU
+    description: запрашиваемые CPU
+    value: "750m"
+    required: true
+  - name: APP_REQUEST_RAM
+    description: запрашиваемая память
+    value: "1700Mi"
+    required: true
+  - name: LOG_LIMIT_CPU
+    description: ограничение CPU
+    value: "50m"
+    required: true
+  - name: LOG_LIMIT_RAM
+    description: ограничение памяти
+    value: "60Mi"
+    required: true
+  - name: LOG_REQUEST_CPU
+    description: запрашиваемые CPU
+    value: "5m"
+    required: true
+  - name: LOG_REQUEST_RAM
+    description: запрашиваемая память
+    value: "30Mi"
+    required: true
+  - name: FIX_RATE
+    description: интервал опроса БД, в мс
+    value: "5000"
+    required: true
+  - name: DB_ACCESS_SECRET_NAME
+    description: secret для доступа к keystore/trustore
+    value: "secret-db-connect-crud-with-kafka"
+    required: true
+  - name: DB_ACCESS_SECRET_ITEMS
+    description: secret для доступа к keystore/trustore item map
+    value: "[{\"key\":\"db-secret.yml\", \"path\": \"db-secret.yml\"}]"
+    #    value: "[{\"key\":\"db-secret.yml\", \"path\": \"db-secret.yml\"},{\"key\":\"keystore.jks\", \"path\": \"keystore.jks\"},{\"key\":\"truststore.jks\", \"path\": \"truststore.jks\"}]"
+    required: true
+  - name: IMAGE_PATH
+    description: путь к образу приложения
+    value: "registry.ca.sbrf.ru/pprb-dev/ci02705305/ci02729426_pprb_payments_dev/crud-with-kafka:1.0-SNAPSHOT"
+    required: true
+  - name: MASTER_DATABASE_SERVER
+    description: адрес MASTER базы данных
+    value: "tklid-pay000020.vm.mos.cloud.sbrf.ru"
+    required: true
+  - name: MASTER_DATABASE_PORT
+    description: порт MASTER базы данных
+    value: "5433"
+    required: true
+  - name: MASTER_DATABASE_SCHEMA
+    description: схема MASTER базы данных
+    value: "objmod?currentSchema=objmod"
+    required: true
+  - name: STANDIN_DATABASE_SERVER
+    description: адрес STANDIN базы данных
+    value: "tklid-pay000021.vm.mos.cloud.sbrf.ru"
+    required: true
+  - name: STANDIN_DATABASE_PORT
+    description: порт STANDIN базы данных
+    value: "5433"
+    required: true
+  - name: STANDIN_DATABASE_SCHEMA
+    description: схема STANDIN базы данных
+    value: "objmod?currentSchema=objmod"
+    required: true
+  - name: BOOTSTRAP_SERVERS
+    description: список адресов брокеров Kafka
+    value: "10.53.128.232:9093,10.53.128.59:9093,10.53.63.240:9093"
+    required: true
+  - name: VERSION
+    description: версия
+    value: "1.0"
+    required: true
+  - name: CPU_UTILIZATION_FOR_AUTOSCALE
+    description: процент утилизация CPU для горизонтального маштабирования
+    value: "50"
+    required: true
+  - name: MAX_REPLICAS
+    description: максимальное количество реплик пода
+    value: "2"
+    required: true
+  - name: MIN_REPLICAS
+    description: минимальное количество реплик пода
+    value: "1"
+    required: true
+  - name: CLUSTER_SHORT_HOST
+    value: "api.dev-gen2.ca.sbrf.ru"
+    required: true
+  - name: ZONE_ID
+    description: идентификатор зоны, где развернут модуль
+    value: "OBJMOD"
+    required: true
+  - name: STAND_ID
+    description: идентификатор стенда, где развернут модуль
+    value: "ci02705305-idevgen2-pprb-ups-objmod"
+    required: true
+  - name: NAME_SPACE
+    description: наименование namesoace
+    value: "ci02705305-idevgen2-pprb-ups-objmod"
+    required: true
+  - name: REPLICATION_STRATEGY
+    description: стратетия репликации в standIn
+    value: "SIMPLE"
+    required: true
+  - name: PARTITION_LOCK_MODE
+    description: стратетия записи в standIn
+    value: "PESSIMISTIC_WRITE"
+    required: true
+  - name: DATA_TYPE
+    description: тип данных в ПЖ
+    value: "BASKET_CV"
+    required: true
+  - name: MAXIMUM_POOL_SIZE
+    description: максимальный размер пула коннектов к БД
+    value: "30"
+    required: true
+  - name: INITIAL_DELAY_SECONDS
+    description: время ожидания liviness/readiness проб
+    value: "60"
+    required: true

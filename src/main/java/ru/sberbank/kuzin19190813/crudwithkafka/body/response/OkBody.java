@@ -13,5 +13,5 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OkBody implements Serializable {
-    String message = "OK";
+    String message = "SUCCESS";
 }

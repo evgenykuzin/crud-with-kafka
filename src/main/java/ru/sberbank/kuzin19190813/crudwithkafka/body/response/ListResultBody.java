@@ -13,5 +13,5 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ListResultBody<T> {
-    List<T> result;
+    List<T> items;
 }

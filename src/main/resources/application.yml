@@ -1,0 +1,54 @@
+kafka:
+  server: 10.53.222.63:9092
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    password: 456
+    url: jdbc:h2:mem:marketplace_db;MV_STORE=false;MODE=MySQL
+    username: 123
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    generate-ddl: true
+    hibernate:
+      ddl-auto: create-drop
+    show_sql: true
+  kafka:
+    consumer:
+      group-id: kafka-id-2
+    template:
+      default-topic: topic1
+logging:
+  file:
+    name: crud-with-kafka.log
+server:
+  port: 8080
+management:
+  server:
+    port: 8090
+  # Включить все конечные точки
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    shutdown:
+      enabled: true
+    health:
+      show-details: always
+  # Включить экспорт prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    # включить гистограмму на основе процентилей для http запросов
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
+    # сегментов гистограммы http SLA
+      sla:
+        http:
+          server:
+            requests: 1ms,5ms
+    # включить метрики JVM
+    enable:
+      jvm: true

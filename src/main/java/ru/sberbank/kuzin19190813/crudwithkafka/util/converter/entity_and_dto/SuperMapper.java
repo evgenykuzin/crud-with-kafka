@@ -11,26 +11,25 @@ public class SuperMapper {
     @Autowired
     ModelMapper modelMapper;
 
-    public <E extends AbstractEntity, D extends AbstractDTO> D toDto(E e) {
+    public final <E extends AbstractEntity, D extends AbstractDTO> D toDto(E e) {
         if (e == null) return null;
         DtoMapper annotation = e.getClass().getAnnotation(DtoMapper.class);
-        Class<D> dtoClass = (Class<D>) annotation.className();
         Class<E> entityClass = (Class<E>) e.getClass();
-        AbstractMapper<E, D> mapper = getMapper(entityClass, dtoClass);
+        Class<D> dtoClass = (Class<D>) annotation.className();
+        DefaultMapper<E, D> mapper = getMapper(entityClass, dtoClass);
         return mapper.toDto(e);
     }
 
-    public <E extends AbstractEntity, D extends AbstractDTO> E toEntity(D d) {
+    public final <E extends AbstractEntity, D extends AbstractDTO> E toEntity(D d) {
         if (d == null) return null;
         EntityMapper annotation = d.getClass().getAnnotation(EntityMapper.class);
-        Class<D> dtoClass = (Class<D>) d.getClass();
         Class<E> entityClass = (Class<E>) annotation.className();
-        AbstractMapper<E, D> mapper = getMapper(entityClass, dtoClass);
+        Class<D> dtoClass = (Class<D>) d.getClass();
+        DefaultMapper<E, D> mapper = getMapper(entityClass, dtoClass);
         return mapper.toEntity(d);
     }
 
-    private <E extends AbstractEntity, D extends AbstractDTO> AbstractMapper<E, D> getMapper(Class<E> entityClass, Class<D> dtoClass) {
-        return new AbstractMapper<>(modelMapper, entityClass, dtoClass) {
-        };
+    private <E extends AbstractEntity, D extends AbstractDTO> DefaultMapper<E, D> getMapper(Class<E> entityClass, Class<D> dtoClass) {
+        return new DefaultMapper<>(modelMapper, entityClass, dtoClass);
     }
 }

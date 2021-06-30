@@ -1,6 +1,0 @@
-#FileLock
-#Mon Jun 28 20:47:23 MSK 2021
-server=192.168.0.12\:65489
-hostName=192.168.0.12
-method=file
-id=17a53bb9fd387dd09332276e070c4ab9b896fcb353f

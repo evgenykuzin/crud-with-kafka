@@ -1,10 +1,10 @@
 package ru.sberbank.kuzin19190813.crudwithkafka.services;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import ru.sberbank.kuzin19190813.crudwithkafka.dto.AbstractDTO;
 import ru.sberbank.kuzin19190813.crudwithkafka.entities.AbstractEntity;
+import ru.sberbank.kuzin19190813.crudwithkafka.repositories.AbstractBaseRepository;
 
-public abstract class CreatorService<D extends AbstractDTO, E extends AbstractEntity, R extends JpaRepository<E, Long>> extends DTOService<D, E, R>{
+public abstract class CreatorService<D extends AbstractDTO, E extends AbstractEntity, R extends AbstractBaseRepository<E>> extends DTOService<D, E, R>{
     public CreatorService(R jpaRepository) {
         super(jpaRepository);
     }

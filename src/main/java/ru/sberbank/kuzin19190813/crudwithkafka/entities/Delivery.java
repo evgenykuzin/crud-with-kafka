@@ -3,6 +3,7 @@ package ru.sberbank.kuzin19190813.crudwithkafka.entities;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 import org.springframework.format.annotation.DateTimeFormat;
 import ru.sberbank.kuzin19190813.crudwithkafka.dto.DeliveryDTO;
@@ -18,13 +19,9 @@ import java.util.List;
 @Entity
 @DtoMapper(className = DeliveryDTO.class)
 public class Delivery extends AbstractEntity {
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    Long id;
-
     City city;
     Date date;
-    Method method;
+    Method method = Method.COURIER;
     List<Order> orders;
 
     @ManyToOne
@@ -60,11 +57,5 @@ public class Delivery extends AbstractEntity {
         SHIP,
         TRAIN,
         PLAIN
-    }
-
-    public enum Status {
-        PACKAGING,
-        DELIVERING,
-        ARRIVED
     }
 }

@@ -53,12 +53,12 @@ public class App extends SpringBootServletInitializer {
     @Bean
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();
-        modelMapper.getConfiguration()
-                .setMatchingStrategy(MatchingStrategies.STRICT)
-                .setFieldMatchingEnabled(true)
-                .setSkipNullEnabled(true)
-                .setCollectionsMergeEnabled(true)
-                .setFieldAccessLevel(PRIVATE);
+        modelMapper.getConfiguration();
+                //.setMatchingStrategy(MatchingStrategies.STRICT)
+                //.setFieldMatchingEnabled(true)
+                //.setSkipNullEnabled(true)
+                //.setCollectionsMergeEnabled(true)
+                //.setFieldAccessLevel(PRIVATE);
         return modelMapper;
     }
 

@@ -1,9 +1,6 @@
 package ru.sberbank.kuzin19190813.crudwithkafka.entities;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.sberbank.kuzin19190813.crudwithkafka.dto.ShopDTO;
 import ru.sberbank.kuzin19190813.crudwithkafka.util.converter.entity_and_dto.DtoMapper;
@@ -12,6 +9,7 @@ import javax.persistence.*;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = {"products", "orders"})
 @Data
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)

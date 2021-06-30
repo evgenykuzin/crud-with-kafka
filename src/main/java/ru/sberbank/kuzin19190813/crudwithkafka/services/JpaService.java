@@ -7,27 +7,27 @@ import ru.sberbank.kuzin19190813.crudwithkafka.services.util.Search;
 import java.util.List;
 
 public abstract class JpaService<E extends AbstractEntity, R extends JpaRepository<E, Long>> {
-    protected R jpaRepository;
+    protected R repository;
 
-    public JpaService(R jpaRepository) {
-        this.jpaRepository = jpaRepository;
+    public JpaService(R repository) {
+        this.repository = repository;
     }
 
     public Long save(E e) {
-        jpaRepository.save(e);
+        repository.save(e);
         return e.getId();
     }
 
     public E getById(Long id) {
-        return jpaRepository.findById(id).orElse(null);
+        return repository.findById(id).orElse(null);
     }
 
     public List<E> findAll() {
-        return jpaRepository.findAll();
+        return repository.findAll();
     }
 
     public void delete(E e) {
-        jpaRepository.delete(e);
+        repository.delete(e);
     }
 
     public List<E> findBy(Search... searches) {

@@ -17,6 +17,5 @@ public class OrderDTO extends AbstractDTO {
     String status;
     Long clientId;
     Long shopId;
-    List<Long> productIds;
     Long deliveryId;
 }

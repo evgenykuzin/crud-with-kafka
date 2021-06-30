@@ -3,6 +3,7 @@ package ru.sberbank.kuzin19190813.crudwithkafka.entities;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 import ru.sberbank.kuzin19190813.crudwithkafka.dto.ProductDTO;
 import ru.sberbank.kuzin19190813.crudwithkafka.util.converter.entity_and_dto.DtoMapper;
@@ -16,16 +17,13 @@ import java.util.List;
 @Entity
 @DtoMapper(className = ProductDTO.class)
 public class Product extends AbstractEntity {
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    Long id;
-
     String productName;
     Double price;
     String barcode;
     String article;
     Shop shop;
     List<Order> orders;
+    List<Review> reviews;
 
     @Column(name = "product_name")
     public String getProductName() {
@@ -50,12 +48,17 @@ public class Product extends AbstractEntity {
         return shop;
     }
 
-    @ManyToMany(mappedBy = "products")
+    @ManyToMany(mappedBy = "products", cascade = CascadeType.ALL)
     public List<Order> getOrders() {
         return orders;
     }
 
-    public void addInOrder(Order order) {
+    @OneToMany(mappedBy = "product")
+    public List<Review> getReviews() {
+        return reviews;
+    }
+
+    public void addOrder(Order order) {
         orders.add(order);
     }
 }

@@ -68,11 +68,10 @@ public class KafkaProducerServiceImpl implements KafkaProducerService {
     @Override
     public ListenableFuture<SendResult<String, String>> sendMessage(String topic, Object message) {
         String jsonMessage = jsonConverter.convertToString(message);
-        log.info("jsonMessage = " + jsonMessage);
         ListenableFuture<SendResult<String, String>> future =
                 kafkaTemplate.send(topic, jsonMessage);
 
-        future.addCallback(new ListenableFutureCallback<>() {
+        future.addCallback(new ListenableFutureCallback<SendResult<String, String>>() {
             @Override
             public void onSuccess(SendResult<String, String> result) {
                 log.info("Sent message=[" + message +

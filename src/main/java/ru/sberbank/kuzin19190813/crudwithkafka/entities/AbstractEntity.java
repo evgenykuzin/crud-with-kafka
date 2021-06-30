@@ -3,6 +3,7 @@ package ru.sberbank.kuzin19190813.crudwithkafka.entities;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public abstract class AbstractEntity implements Serializable {
     Long id;
     LocalDateTime created;

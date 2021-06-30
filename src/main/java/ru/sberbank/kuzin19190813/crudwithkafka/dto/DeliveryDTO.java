@@ -18,5 +18,4 @@ public class DeliveryDTO extends AbstractDTO {
     Long cityId;
     Date date;
     String method;
-    List<Long> orderIds;
 }

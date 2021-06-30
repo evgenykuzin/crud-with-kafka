@@ -12,7 +12,6 @@ import ru.sberbank.kuzin19190813.crudwithkafka.util.converter.entity_and_dto.Ent
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @EntityMapper(className = Review.class)
 public class ReviewDTO extends AbstractDTO {
-    Long id;
     String comment;
     Integer estimate;
     Long productId;

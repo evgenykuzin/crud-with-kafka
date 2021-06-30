@@ -4,8 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.sberbank.kuzin19190813.crudwithkafka.body.request.KafkaBody;
-import ru.sberbank.kuzin19190813.crudwithkafka.body.response.OkBody;
+import ru.sberbank.kuzin19190813.crudwithkafka.body.response.KafkaBody;
+import ru.sberbank.kuzin19190813.crudwithkafka.body.response.RespBody;
 import ru.sberbank.kuzin19190813.crudwithkafka.dto.AbstractDTO;
 import ru.sberbank.kuzin19190813.crudwithkafka.entities.AbstractEntity;
 import ru.sberbank.kuzin19190813.crudwithkafka.services.CreatorService;
@@ -21,13 +21,13 @@ public abstract class CreatorController<E extends AbstractEntity, D extends Abst
     }
 
     @PostMapping("/create")
-    public Object create(@RequestParam String name) {
+    public RespBody<Long> create(@RequestParam String name) {
         String entityName = parseEntityName();
         log.info("[{}}]: /create/?name={}", entityName, name);
         kafkaProducerService.submit(new KafkaBody("create", entityName, name));
         log.info("kafka message was sent");
         Long id = creatorService.create(name);
         log.info("{} created with id: {}", entityName, id);
-        return new OkBody();
+        return RespBody.result(id);
     }
 }

@@ -5,6 +5,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.sberbank.kuzin19190813.crudwithkafka.dto.ClientDTO;
+import ru.sberbank.kuzin19190813.crudwithkafka.dto.OrderDTO;
 import ru.sberbank.kuzin19190813.crudwithkafka.entities.Client;
 import ru.sberbank.kuzin19190813.crudwithkafka.entities.Delivery;
 import ru.sberbank.kuzin19190813.crudwithkafka.entities.Order;
@@ -13,9 +14,9 @@ import ru.sberbank.kuzin19190813.crudwithkafka.repositories.ClientRepository;
 import ru.sberbank.kuzin19190813.crudwithkafka.services.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
-//@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ClientServiceImpl extends CreatorService<ClientDTO, Client, ClientRepository> implements ClientService {
     ProductServiceImpl productService;
@@ -39,6 +40,18 @@ public class ClientServiceImpl extends CreatorService<ClientDTO, Client, ClientR
     public Order buyProduct(Long clientId, String barcode) {
         Product product = productService.findByBarcode(barcode);
         return buyProduct(clientId, product);
+    }
+
+    @Override
+    public List<Order> getOrders(Long clientId) {
+        return repository.getById(clientId).getOrders();
+    }
+
+    public List<OrderDTO> getOrderDtos(Long clientId) {
+        return getOrders(clientId)
+                .stream()
+                .map(order -> (OrderDTO) superMapper.toDto(order))
+                .collect(Collectors.toList());
     }
 
     @Override
